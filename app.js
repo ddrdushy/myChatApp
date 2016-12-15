@@ -40,20 +40,32 @@ io.on('connection', function(socket){
 
   socket.on('pm', function(to,from, message,callback) {
       var id = onlineClients[to];
-      io.sockets.connected[id].emit("updatechat",to,from,message);
-      var responseData = { string1:'I like ', string2: 'bananas ', string3:' dude!' };
-      //console.log('connection data:', evData);
-      callback(responseData);
+      if(id!==undefined){
+        try{
+          io.sockets.connected[id].emit("updatechat",to,from,message);
+          var responseData = { string1:'I like ', string2: 'bananas ', string3:' dude!' };
+          //console.log('connection data:', evData);
+          callback(responseData);
+        }catch(e){
+          socket.broadcast.emit('updatechat', 'SERVER','SERVER', 'User left the chat');
+          console.log('User left the chat');
+        }
+      }
       //io.sockets.socket[id].emit('updatechat', socket.username, message);
   });
 
   socket.on('disconnect', function(){
+    // remove the username from global usernames list
+		delete usernames[socket.username];
+		// update list of users in chat, client-side
+		io.sockets.emit('updateusers', usernames);
+		// echo globally that this client has left
+    socket.broadcast.emit('updatechat', 'SERVER','SERVER', socket.username+' disconnected\r');
+		//socket.broadcast.emit('updatechat', 'SERVER', 'SERVER', socket.username + ' has disconnected\r');
     console.log('user disconnected');
   });
 
 });
-
-
 
 server.listen(app.get('port'), function() {
     console.log('Node app is running on port', app.get('port'));

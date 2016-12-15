@@ -1,5 +1,5 @@
 $(document).ready(function(){
-  var socket = io('http://mychaty.herokuapp.com');
+  var socket = io('http://10.100.9.114:3000');
   var user={};
   var username='';
   var name='';
@@ -27,9 +27,9 @@ $(document).ready(function(){
     if(username!==''){
       socket.emit('pm', username,name, mess,function(res){
         console.log('Callback called with data:', res);
+        $('#messages').append(name+ ': ' + mess + "\r");
+        $('#message').val('');
       });
-      $('#messages').append(name+ ': ' + mess + "\r");
-      $('#message').val('');
     }
     else
       alert('Select User to send message');
