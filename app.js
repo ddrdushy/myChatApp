@@ -8,6 +8,7 @@ var server=http.Server(app);
 var io=sio(server);
 
 app.set('view engine','jade');
+app.set('port', (process.env.PORT || 3000));
 
 app.use(express.static("public"));
 app.use(express.static("node_modules/bootstrap/dist"));
@@ -51,6 +52,6 @@ io.on('connection', function(socket){
 
 
 
-server.listen(3000,()=>{
-  console.log('Server Listening on port 3000');
+server.listen(app.get('port'), function() {
+    console.log('Node app is running on port', app.get('port'));
 });
