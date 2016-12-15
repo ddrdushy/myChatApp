@@ -1,5 +1,5 @@
 $(document).ready(function(){
-  var socket = io('http://10.100.9.114:3000');
+  var socket = io('http://mychaty.herokuapp.com/');
   var user={};
   var username='';
   var name='';
