@@ -3,6 +3,7 @@ $(document).ready(function(){
   var user={};
   var username='';
   var name='';
+
   $('#myModal').modal({backdrop: 'static', keyboard: false});
 
   $('#bt').click(function(){
@@ -11,24 +12,26 @@ $(document).ready(function(){
       user.name=name;
       socket.emit('adduser', user);
       $('#myModal').modal('toggle');
+      $('#username').val="Hello "+name;
   });
 
   $('body').on('click', 'a.user', function (event) {
           username = $(event.target).attr("username");
-          $(event.target).attr("username").val=username+" @";
           //alert(username);
-      });
+  });
 
 
 
   $('#post').click(function(){
     var mess=$('#message').val();
-    socket.emit('pm', username, mess);
-    alert(user.name);
+    if(username!=='')
+      socket.emit('pm', username, mess);
+    else
+      alert('Select User to send message');
   });
 
   socket.on('updatechat', function (username, data) {
-    $('#messages').append('<b>'+username + ':</b> ' + data + '<br>');
+    $('#messages').append('<b>'+username + ':</b> ' + data + "\r");
     console.log(username);
     console.log(data);;
 	});
