@@ -33,7 +33,7 @@ io.on('connection', function(socket){
     socket.username=user.name;
     usernames[user.name]=socket.id;
     onlineClients[user.name] = socket.id;
-    socket.emit('updatechat', 'SERVER', 'you have connected');
+    socket.emit('updatechat', 'SERVER', 'you have connected\r');
     io.sockets.emit('updateusers', usernames);
     console.log(usernames);
   });
