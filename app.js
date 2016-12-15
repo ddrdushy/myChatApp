@@ -33,14 +33,17 @@ io.on('connection', function(socket){
     socket.username=user.name;
     usernames[user.name]=socket.id;
     onlineClients[user.name] = socket.id;
-    socket.emit('updatechat', 'SERVER', 'you have connected\r');
+    socket.emit('updatechat', 'SERVER','SERVER', 'you have connected\r');
     io.sockets.emit('updateusers', usernames);
     console.log(usernames);
   });
 
-  socket.on('pm', function(to, message) {
+  socket.on('pm', function(to,from, message,callback) {
       var id = onlineClients[to];
-      io.sockets.connected[id].emit("updatechat",to,message);
+      io.sockets.connected[id].emit("updatechat",to,from,message);
+      var responseData = { string1:'I like ', string2: 'bananas ', string3:' dude!' };
+      //console.log('connection data:', evData);
+      callback(responseData);
       //io.sockets.socket[id].emit('updatechat', socket.username, message);
   });
 

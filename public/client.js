@@ -1,5 +1,5 @@
 $(document).ready(function(){
-  var socket = io('http://mychaty.herokuapp.com');
+  var socket = io('http://10.100.9.114:3000');
   var user={};
   var username='';
   var name='';
@@ -12,7 +12,7 @@ $(document).ready(function(){
       user.name=name;
       socket.emit('adduser', user);
       $('#myModal').modal('toggle');
-      $('#username').val="Hello "+name;
+      $('#username').append("Welcome "+name);
   });
 
   $('body').on('click', 'a.user', function (event) {
@@ -24,14 +24,20 @@ $(document).ready(function(){
 
   $('#post').click(function(){
     var mess=$('#message').val();
-    if(username!=='')
-      socket.emit('pm', username, mess);
+    if(username!==''){
+      socket.emit('pm', username,name, mess,function(res){
+        console.log('Callback called with data:', res);
+      });
+      $('#messages').append(name+ ': ' + mess + "\r");
+      $('#message').val('');
+    }
     else
       alert('Select User to send message');
   });
 
-  socket.on('updatechat', function (username, data) {
-    $('#messages').append('<b>'+username + ':</b> ' + data + "\r");
+  socket.on('updatechat', function (username,from, data) {
+    console.log(username+ ': ' + data + "\r");
+    $('#messages').append(from+ ': ' + data + "\r");
     console.log(username);
     console.log(data);;
 	});
