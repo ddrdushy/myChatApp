@@ -6,24 +6,22 @@ html(lang='en')
         script(src='/socket.io/socket.io.js')
         script(src='/jquery.min.js', type='text/javascript')
         script(src='/js/bootstrap.min.js')
-
-        body(class='container')
-            div.row
-                div.col-md-4
-                    h3 Online Users
-                    div#users.list-group
-                div.col-md-8
-                    h3#username
-                    textarea#messages.form-control(rows=15)
-                    h3 Post A Message
-                    textarea#message.form-control(rows=2)
-                    button.btn.btn-primary#post Post
-
-        #myModal.modal.fade(role='dialog')
-            .modal-dialog
-                // Modal content
-                .modal-content
-                    .modal-body.text-center
-                        input#user(type='text', placeholder='Enter the user Name')
-                        button#bt.btn.btn-primary submit
-        script(src='./client.js')
+    body.container
+        .row
+            .col-md-4
+                h3 Online Users
+                #users.list-group
+            .col-md-8
+                h3#username
+                textarea#messages.form-control(rows='15')
+                h3 Post A Message
+                textarea#message.form-control(rows='2')
+                button#post.btn.btn-primary Post
+    #myModal.modal.fade(role='dialog')
+        .modal-dialog
+            // Modal content
+            .modal-content
+                .modal-body.text-center
+                    input#user(type='text', placeholder='Enter the user Name', required='')
+                    button#bt.btn.btn-primary submit
+    script(src='./client.js')

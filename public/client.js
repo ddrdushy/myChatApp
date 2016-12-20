@@ -1,18 +1,34 @@
 $(document).ready(function() {
-    var socket = io('http://mychaty.herokuapp.com');
+    var socket = io('http://mychaty.herokuapp.com/');
     var user = {};
     var username = '';
     var name = '';
 
+    var online="";
+    //alert(name);
+    $.ajax({
+        type: "GET",
+        url: "/api/onlineusers",
+        async: true,
+        success:function (users) {
+          console.log(users);
+          online=users;
+        }
+    });
+
     $('#myModal').modal({backdrop: 'static', keyboard: false});
 
     $('#bt').click(function() {
-        name = $('#user').val();
-        //alert(name);
+      name = $('#user').val();
+     console.log(online.hasOwnProperty('dushy'));
+      if(online.hasOwnProperty(name)){
         user.name = name;
         socket.emit('adduser', user);
         $('#myModal').modal('toggle');
         $('#username').append("Welcome " + name);
+      }else{
+        alert('User already logged in');
+      }
     });
 
     $('body').on('click', 'a.user', function(event) {

@@ -87,7 +87,7 @@ io.on('connection', function(socket) {
     });
 });
 
-app.get('/message/:from/:to/:message',(req,res)=>{
+app.get('/api/:from/:to/:message',(req,res)=>{
     console.log(req.params);
     var id=onlineClients[req.params.to];
     if (id !== undefined) {
@@ -103,6 +103,11 @@ app.get('/message/:from/:to/:message',(req,res)=>{
     }
     //io.sockets.connected[id].emit("updatechat", to, from, message);
     res.end('done');
+});
+
+app.get('/api/onlineusers',(req,res)=>{
+  console.log(JSON.stringify(usernames));
+  res.json(usernames);
 });
 
 server.listen(app.get('port'), function() {
