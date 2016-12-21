@@ -1,9 +1,13 @@
 # MyChaty
 
-===================== this is a simple chat application created with `socket.io` and `node.js`. this is a sample for `real time data Synchronization` .
+=====================
+
+this is a simple chat application created with `socket.io` and `node.js`. this is a sample for `real time data Synchronization` .
 
 ## Project Structure
+
 =====================
+
 ```
 Project
 +-- data
@@ -22,7 +26,9 @@ Project
 ```
 
 ## Dependencies
+
 ===================
+
 ```json
 "engines": {
   "node": "6.9.1"
@@ -38,7 +44,9 @@ Project
 ```
 
 ## Installation
+
 ===================
+
 - use git to get the project `git clone https://github.com/ddrdushy/myChatApp.git`
 - get in to the project folder `cd myChatApp`
 - install dependencies `npm install`
@@ -58,7 +66,9 @@ Project
 - run the application `npm start`
 
 ## API Description
+
 ==========================
+
 ### Send Message to a specific user
 
 ```
@@ -70,6 +80,7 @@ from    : User name who sending the message
 to      : User who receive the message
 message : Message to be sent to the user
 ```
+
 Note : If the user is not active the message will be stored in the **pending.json** file. it will sent back to the user when the user connects.
 
 ### get the online users list
