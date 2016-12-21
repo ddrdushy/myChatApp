@@ -135,8 +135,11 @@ app.get('/api/:from/:to/:message', (req, res) => {
             res.end('done');
         } catch (e) {
             pendingMessages.push({to: req.params.to, from: req.params.from, message: req.params.message});
-            fs.writeFile( "pending.json", JSON.stringify( pendingMessages ), "utf8", function(err){
-              console.log(err);
+            jsonfile.writeFile(file2, pendingMessages, function(err) {
+                if (err) {
+                    return console.log("error");
+                }
+                console.log("saved");
             });
             console.log('User left the chat');
             console.log(pendingMessages);
