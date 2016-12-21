@@ -146,6 +146,7 @@ app.get('/api/:from/:to/:message', (req, res) => {
             res.end('Pending');
         }
     }
+    res.end('ok');
     //io.sockets.connected[id].emit("updatechat", to, from, message);
 });
 
