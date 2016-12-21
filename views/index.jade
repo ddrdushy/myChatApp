@@ -24,4 +24,7 @@ html(lang='en')
                 .modal-body.text-center
                     input#user(type='text', placeholder='Enter the user Name', required='')
                     button#bt.btn.btn-primary submit
+                #alert.alert.alert-danger.alert-dismissable
+                    a.close(href='#',aria-label='close') ×
+                    strong Uesr already logged in!
     script(src='./client.js')
