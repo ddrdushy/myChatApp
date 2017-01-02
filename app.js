@@ -2,6 +2,7 @@ var express = require('express');
 var http = require('http');
 var sio = require('socket.io');
 var jsonfile = require('jsonfile');
+var mysql = require('mysql');
 /* +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
 var app = express();
@@ -24,6 +25,29 @@ app.use(express.static("public"));
 app.use(express.static("node_modules/bootstrap/dist"));
 app.use(express.static("node_modules/jquery/dist"));
 /* +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+var connection = mysql.createConnection({
+    host     : 'localhost',
+    user     : 'root',
+    password : '',
+    database : 'hr'
+});
+
+connection.connect(function(err) {
+    if (err) {
+        console.error('error connecting: ' + err.stack);
+        return;
+    }
+
+    console.log('connected as id ' + connection.threadId);
+});
+
+connection.query("select * from department",function(err,rows){
+
+    if(!err) {
+        console.log(JSON.stringify(rows));
+    }
+});
 
 app.get('/', (req, res) => {
     res.render('index',users);

@@ -1,5 +1,5 @@
 $(document).ready(function() {
-    var socket = io('http://mychaty.herokuapp.com');
+    var socket = io('http://localhost:3000');
     var user = {};
     var username = '';
     var name = '';
