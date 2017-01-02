@@ -1,34 +1,39 @@
 $(document).ready(function() {
-    var socket = io('http://localhost:3000');
+    var socket = io('http://mychaty.herokuapp.com');
     var user = {};
     var username = '';
     var name = '';
-
-    var online="";
+    var online = "";
     //alert(name);
     $.ajax({
         type: "GET",
         url: "/api/onlineusers",
         async: true,
-        success:function (users) {
-          console.log(users);
-          online=users;
+        success: function(users) {
+            console.log(users);
+            online = users;
         }
     });
+    $('#alert').hide();
+    $('.alert .close').on('click', function(e) {
+        $(this).parent().hide();
+    });
+    //[DIV].style.visibility='hidden'
 
     $('#myModal').modal({backdrop: 'static', keyboard: false});
 
     $('#bt').click(function() {
-      name = $('#user').val();
-     console.log(online.hasOwnProperty('dushy'));
-      if(!online.hasOwnProperty(name)){
+        name = $('#user').val();
+        console.log(online.hasOwnProperty(name));
+        if (online.hasOwnProperty(name)) {
+            $('#alert').show();
+            return;
+        }
         user.name = name;
         socket.emit('adduser', user);
         $('#myModal').modal('toggle');
         $('#username').append("Welcome " + name);
-      }else{
-        alert('User already logged in');
-      }
+
     });
 
     $('body').on('click', 'a.user', function(event) {
@@ -38,6 +43,10 @@ $(document).ready(function() {
 
     $('#post').click(function() {
         var mess = $('#message').val();
+        if(mess===''){
+          alert('Message Required');
+          return;
+        }
         if (username !== '') {
             socket.emit('pm', username, name, mess, function(res) {
                 console.log('Callback called with data:', res);
