@@ -1,5 +1,5 @@
 $(document).ready(function() {
-    var socket = io('http://mychaty.herokuapp.com/');
+    var socket = io('http://localhost:3000');
     var user = {};
     var username = '';
     var name = '';
@@ -21,7 +21,7 @@ $(document).ready(function() {
     $('#bt').click(function() {
       name = $('#user').val();
      console.log(online.hasOwnProperty('dushy'));
-      if(online.hasOwnProperty(name)){
+      if(!online.hasOwnProperty(name)){
         user.name = name;
         socket.emit('adduser', user);
         $('#myModal').modal('toggle');

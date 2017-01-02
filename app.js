@@ -1,6 +1,9 @@
 var express = require('express');
 var http = require('http');
 var sio = require('socket.io');
+var jsonfile = require('jsonfile');
+
+var users = './data/user.json';
 
 var app = express();
 
@@ -15,7 +18,7 @@ app.use(express.static("node_modules/bootstrap/dist"));
 app.use(express.static("node_modules/jquery/dist"));
 
 app.get('/', (req, res) => {
-    res.render('index');
+    res.render('index',users);
 });
 
 
@@ -36,6 +39,11 @@ io.on('connection', function(socket) {
         onlineClients[user.name] = socket.id;
         socket.emit('updatechat', 'SERVER', 'SERVER', 'you have connected\r');
         io.sockets.emit('updateusers', usernames);
+
+        jsonfile.writeFile(users,function(err){
+            if(err){return console.log("error");}
+            console.log("saved");
+        });
 
         var pendingm = pendingMessages.filter((e) => {
             return e.to === user.name;
