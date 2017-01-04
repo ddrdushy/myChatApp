@@ -27,11 +27,25 @@ app.use(express.static("node_modules/jquery/dist"));
 /* +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
 var connection = mysql.createConnection({
-    host     : 'localhost',
-    user     : 'root',
-    password : '',
-    database : 'hr'
+    host     : 'sql6.freemysqlhosting.net',
+    user     : 'sql6152186',
+    password : 'j6urWmviv2',
+    database : 'sql6152186'
 });
+
+
+
+app.get('/', (req, res) => {
+    res.render('index',users);
+});
+
+/* +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+//global object for users
+var usernames = {};
+var usersfromDB;
+var onlineClients = {};
+var pendingMessages = [];
+
 
 connection.connect(function(err) {
     if (err) {
@@ -41,23 +55,16 @@ connection.connect(function(err) {
 
     console.log('connected as id ' + connection.threadId);
 });
-
-connection.query("select * from department",function(err,rows){
+/*
+connection.query("select * from chat where status='Y'",function(err,rows){
 
     if(!err) {
         console.log(JSON.stringify(rows));
+        usersfromDB=rows;
     }
 });
+*/
 
-app.get('/', (req, res) => {
-    res.render('index',users);
-});
-
-/* +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-//global object for users
-var usernames = {};
-var onlineClients = {};
-var pendingMessages = [];
 
 io.on('connection', function(socket) {
     console.log('a user connected');
@@ -68,14 +75,30 @@ io.on('connection', function(socket) {
         onlineClients[user.name] = socket.id;
         socket.emit('updatechat', 'SERVER', 'SERVER', 'you have connected\r');
         io.sockets.emit('updateusers', usernames);
-
+        //user will be added here
+/*
         jsonfile.writeFile(file, usernames, function(err) {
             if (err) {
                 return console.log("error");
             }
             console.log("saved");
         });
-
+*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+        var qry="UPDATE chat SET id='"+socket.id+"',status='Y' where user='"+user.name+"'";
+        connection.query(qry,function(err,rows){
+            if(rows.affectedRows===0){
+              connection.query('INSERT INTO chat SET ?',{user:user.name,id:socket.id,status:'Y'},function(err,result){
+                if(!err){
+                  console.log(result);
+                  console.log('inserted');
+                }
+                console.log(err);
+              });
+            }
+            console.log(err);
+        });
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
         var pendingm = pendingMessages.filter((e) => {
             return e.to === user.name;
         });
@@ -143,6 +166,16 @@ io.on('connection', function(socket) {
             }
             console.log("saved");
         });
+
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+        var qry="UPDATE chat SET status='N' where user='"+socket.username+"'";
+        connection.query(qry,function(err,rows){
+            if(!err){
+              console.log('User Disconnected');
+            }
+            console.log(err);
+        });
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
         //socket.broadcast.emit('updatechat', 'SERVER', 'SERVER', socket.username + ' has disconnected\r');
         console.log('user disconnected');
     });
