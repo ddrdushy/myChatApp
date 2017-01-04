@@ -12,10 +12,10 @@ var io = sio(server);
 /* +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
 var file = './data/user.json';
-var file2 = './data/pending.json';
+//var file2 = './data/pending.json';
 
 var users = require(file);
-var pendingMessages = require(file2);
+//var pendingMessages = require(file2);
 /* +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
 app.set('view engine', 'jade');
@@ -136,32 +136,40 @@ io.on('connection', function(socket) {
 });
 
 app.get('/api/:from/:to/:message', (req, res) => {
-    console.log(req.params);
-    var id = onlineClients[req.params.to];
-    if (id !== undefined) {
-        try {
-            io.sockets.connected[id].emit("updatechat", req.params.to, req.params.from, req.params.message);
-            var responseData = "hello";
-            callback(responseData);
-            res.end('done');
-        } catch (e) {
-            pendingMessages.push({to: req.params.to, from: req.params.from, message: req.params.message});
+    //console.log(req.params);
+    var id;
+    id=connection.query("SELECT id FROM chat WHERE status='Y' AND user='"+req.params.to+"'",function(err,rows){
+        if(!err) {
+          console.log(rows);
+          //console.log(rows[0].hasOwnProperty('id'));
+          if (rows[0]!== undefined && rows[0].hasOwnProperty('id')) {
+              var id=rows[0].id;
+              io.sockets.connected[id].emit("updatechat", req.params.to, req.params.from, req.params.message);
 
-            var qry="INSERT INTO pen_message SET ?";
-            connection.query(qry,{to: req.params.to, from: req.params.from, message: req.params.message,status:'N'},function(err,rows){
-                if(!err){console.log("added "+e.id);}
-            });
-            console.log('User left the chat');
-            //console.log(pendingMessages);
-            res.end('Pending');
-        }
-    }
-    res.end('ok');
+              res.end('done');
+              //pendingMessages.push({to: req.params.to, from: req.params.from, message: req.params.message});
+              //console.log(e);
+
+              }else{
+                var qry="INSERT INTO pen_message SET ?";
+                connection.query(qry,{to: req.params.to, from: req.params.from, message: req.params.message,status:'N'},function(err,rows){
+                    if(!err){console.log("added ");}
+                });
+                console.log('User left the chat');
+                //console.log(pendingMessages);
+                res.end('Pending');
+              }
+          }
+        console.log('from sql');
+    });
+    console.log('after sql');
+    //var id = onlineClients[req.params.to];
+
+  //  res.end('ok');
 });
 
 app.get('/api/onlineusers', (req, res) => {
     connection.query("select * from chat where status='Y'",function(err,rows){
-
         if(!err) {
           res.json(rows);
         }
