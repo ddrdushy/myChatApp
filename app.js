@@ -3,6 +3,7 @@ var http = require('http');
 var sio = require('socket.io');
 var jsonfile = require('jsonfile');
 var mysql = require('mysql');
+var sendPendingMessage=require('./pendingMessage');
 /* +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
 var app = express();
@@ -33,8 +34,6 @@ var connection = mysql.createConnection({
     database : 'sql6152186'
 });
 
-
-
 app.get('/', (req, res) => {
     res.render('index',users);
 });
@@ -55,16 +54,6 @@ connection.connect(function(err) {
 
     console.log('connected as id ' + connection.threadId);
 });
-/*
-connection.query("select * from chat where status='Y'",function(err,rows){
-
-    if(!err) {
-        console.log(JSON.stringify(rows));
-        usersfromDB=rows;
-    }
-});
-*/
-
 
 io.on('connection', function(socket) {
     console.log('a user connected');
@@ -76,14 +65,7 @@ io.on('connection', function(socket) {
         socket.emit('updatechat', 'SERVER', 'SERVER', 'you have connected\r');
         io.sockets.emit('updateusers', usernames);
         //user will be added here
-/*
-        jsonfile.writeFile(file, usernames, function(err) {
-            if (err) {
-                return console.log("error");
-            }
-            console.log("saved");
-        });
-*/
+
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
         var qry="UPDATE chat SET id='"+socket.id+"',status='Y' where user='"+user.name+"'";
         connection.query(qry,function(err,rows){
@@ -93,35 +75,19 @@ io.on('connection', function(socket) {
                   console.log(result);
                   console.log('inserted');
                 }
-                console.log(err);
               });
+            }
+        });
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+        qry="SELECT * FROM pen_message WHERE `to`='"+user.name+"' AND `status` = 'N' ";
+        //console.log(qry);
+        connection.query(qry,function(err,rows){
+            if(!err){
+              console.log(rows);
+              sendPendingMessage(rows,io,connection,socket);
             }
             console.log(err);
         });
-/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-        var pendingm = pendingMessages.filter((e) => {
-            return e.to === user.name;
-        });
-
-        if (pendingm.length > 0) {
-            pendingm.map((e) => {
-                io.sockets.connected[socket.id].emit("updatechat", e.to, e.from, e.message);
-            });
-            pendingm = [];
-        }
-
-        pendingMessages = pendingMessages.filter((e) => {
-            return e.to !== user.name;
-        });
-
-
-        jsonfile.writeFile(file2, pendingMessages, function(err) {
-            if (err) {
-                return console.log("error");
-            }
-            console.log("saved");
-        });
-
         console.log(usernames);
     });
 
@@ -134,20 +100,16 @@ io.on('connection', function(socket) {
                 var responseData = "hello";
                 callback(responseData);
             } catch (e) {
-                pendingMessages.push({to: to, from: from, message: message});
+                //pendingMessages.push({to: to, from: from, message: message});
 
-                jsonfile.writeFile(file2, pendingMessages, function(err) {
-                    if (err) {
-                        return console.log("error");
-                    }
-                    console.log("saved");
+                qry="INSERT INTO pen_message SET ?";
+                connection.query(qry,{to: to, from: from, message: message,status:'N'},function(err,rows){
+                    if(!err){console.log("added "+e.id);}
                 });
 
                 console.log('User left the chat');
-                console.log(pendingMessages);
             }
         }
-        //io.sockets.socket[id].emit('updatechat', socket.username, message);
     });
 
     //user disconnect
@@ -160,13 +122,6 @@ io.on('connection', function(socket) {
         if (socket.username !== undefined)
             socket.broadcast.emit('updatechat', 'SERVER', 'SERVER', socket.username + ' disconnected\r');
 
-        jsonfile.writeFile(file, usernames, function(err) {
-            if (err) {
-                return console.log("error");
-            }
-            console.log("saved");
-        });
-
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
         var qry="UPDATE chat SET status='N' where user='"+socket.username+"'";
         connection.query(qry,function(err,rows){
@@ -176,7 +131,6 @@ io.on('connection', function(socket) {
             console.log(err);
         });
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-        //socket.broadcast.emit('updatechat', 'SERVER', 'SERVER', socket.username + ' has disconnected\r');
         console.log('user disconnected');
     });
 });
@@ -192,24 +146,26 @@ app.get('/api/:from/:to/:message', (req, res) => {
             res.end('done');
         } catch (e) {
             pendingMessages.push({to: req.params.to, from: req.params.from, message: req.params.message});
-            jsonfile.writeFile(file2, pendingMessages, function(err) {
-                if (err) {
-                    return console.log("error");
-                }
-                console.log("saved");
+
+            var qry="INSERT INTO pen_message SET ?";
+            connection.query(qry,{to: req.params.to, from: req.params.from, message: req.params.message,status:'N'},function(err,rows){
+                if(!err){console.log("added "+e.id);}
             });
             console.log('User left the chat');
-            console.log(pendingMessages);
+            //console.log(pendingMessages);
             res.end('Pending');
         }
     }
     res.end('ok');
-    //io.sockets.connected[id].emit("updatechat", to, from, message);
 });
 
 app.get('/api/onlineusers', (req, res) => {
-    console.log(JSON.stringify(usernames));
-    res.json(usernames);
+    connection.query("select * from chat where status='Y'",function(err,rows){
+
+        if(!err) {
+          res.json(rows);
+        }
+    });
 });
 
 server.listen(app.get('port'), function() {
